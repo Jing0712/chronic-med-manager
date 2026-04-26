@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>慢病用药小管家</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="应用导航">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <path d="M10 27c0-8 6-15 14-15s14 7 14 15v2c0 5-4 9-9 9H19c-5 0-9-4-9-9v-2Z" fill="currentColor" opacity=".18" />
+              <path d="M19 23h10M24 18v10" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
+              <path d="M18 36c2 4 10 4 12 0" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" />
+            </svg>
+          </div>
+          <div>
+            <h1>慢病用药小管家</h1>
+            <p>问诊 · 购药 · 用药 · 续方</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="主要视图">
+          <button class="tab active" data-view="today" type="button">
+            <span class="icon" aria-hidden="true">◎</span><span>今日计划</span>
+          </button>
+          <button class="tab" data-view="plan" type="button">
+            <span class="icon" aria-hidden="true">＋</span><span>用药建档</span>
+          </button>
+          <button class="tab" data-view="refill" type="button">
+            <span class="icon" aria-hidden="true">↻</span><span>购药续方</span>
+          </button>
+          <button class="tab" data-view="review" type="button">
+            <span class="icon" aria-hidden="true">▣</span><span>复诊回顾</span>
+          </button>
+        </nav>
+
+        <section class="patient-panel" aria-label="患者信息">
+          <label>
+            <span>照护对象</span>
+            <input id="patientName" type="text" autocomplete="name" />
+          </label>
+          <label>
+            <span>主要慢病</span>
+            <input id="patientCondition" type="text" />
+          </label>
+          <label class="switch-row">
+            <span>家属同步提醒</span>
+            <input id="familySync" type="checkbox" />
+          </label>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p id="currentDate" class="eyebrow"></p>
+            <h2 id="viewTitle">今日计划</h2>
+          </div>
+          <div class="top-actions">
+            <button id="exportBtn" class="icon-btn" type="button" title="导出摘要" aria-label="导出摘要">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14" /></svg>
+            </button>
+            <button id="resetBtn" class="ghost-btn" type="button">重置示例</button>
+          </div>
+        </header>
+
+        <section class="visual-band" aria-label="连续服务流程">
+          <div class="care-visual" aria-hidden="true">
+            <svg viewBox="0 0 680 180" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="careFlow" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#e8f6f2" />
+                  <stop offset=".55" stop-color="#f4efe7" />
+                  <stop offset="1" stop-color="#eaf0fb" />
+                </linearGradient>
+              </defs>
+              <rect width="680" height="180" fill="url(#careFlow)" />
+              <path d="M0 132C87 88 143 112 218 83c88-34 131-46 214-10 86 37 141 15 248-37v144H0Z" fill="#ffffff" opacity=".6" />
+              <g fill="none" stroke="#236b61" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M94 112c32-40 68-58 108-52 39 6 61 40 101 45 55 7 90-42 144-31 49 10 79 55 132 38" opacity=".35" />
+                <path d="M111 76h72M147 40v72" />
+                <path d="M310 54h62v46h-62z" />
+                <path d="M330 76h22" />
+                <path d="M487 50c26 0 47 21 47 47h-47z" />
+                <path d="M522 116l34 34" />
+              </g>
+            </svg>
+          </div>
+          <div class="flow-steps">
+            <span>问诊记录</span>
+            <span>处方购药</span>
+            <span>服药打卡</span>
+            <span>复诊续方</span>
+          </div>
+        </section>
+
+        <section id="todayView" class="view active-view">
+          <div class="stats-grid" id="statsGrid"></div>
+          <div class="content-grid">
+            <section class="panel task-panel">
+              <div class="panel-heading">
+                <h3>今日服药</h3>
+                <span id="todayProgress" class="status-chip"></span>
+              </div>
+              <div id="doseList" class="dose-list"></div>
+            </section>
+            <section class="panel insight-panel">
+              <div class="panel-heading">
+                <h3>智能提醒</h3>
+                <span class="status-chip">AI 规则引擎</span>
+              </div>
+              <div id="insights" class="insights"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="planView" class="view">
+          <form id="medForm" class="panel form-panel">
+            <div class="panel-heading">
+              <h3>新增或更新用药计划</h3>
+              <button class="primary-btn" type="submit">保存计划</button>
+            </div>
+            <div class="form-grid">
+              <label>
+                <span>药品名称</span>
+                <input id="medName" required placeholder="如：二甲双胍缓释片" />
+              </label>
+              <label>
+                <span>单次剂量</span>
+                <input id="dose" required placeholder="如：0.5g / 1片" />
+              </label>
+              <label>
+                <span>每日次数</span>
+                <select id="frequency">
+                  <option value="1">每日 1 次</option>
+                  <option value="2">每日 2 次</option>
+                  <option value="3">每日 3 次</option>
+                  <option value="4">每日 4 次</option>
+                </select>
+              </label>
+              <label>
+                <span>当前库存</span>
+                <input id="stock" type="number" min="0" step="1" required />
+              </label>
+              <label>
+                <span>库存预警</span>
+                <input id="stockWarn" type="range" min="3" max="20" value="7" />
+                <output id="stockWarnOut">7 天</output>
+              </label>
+              <label>
+                <span>处方可用天数</span>
+                <input id="rxDays" type="number" min="1" step="1" required />
+              </label>
+              <label>
+                <span>下次复诊</span>
+                <input id="followUpDate" type="date" required />
+              </label>
+              <label>
+                <span>购药渠道</span>
+                <select id="purchaseChannel">
+                  <option>线上药房</option>
+                  <option>医院药房</option>
+                  <option>社区药店</option>
+                </select>
+              </label>
+            </div>
+            <fieldset>
+              <legend>服药时间</legend>
+              <div class="time-options">
+                <label><input type="checkbox" name="time" value="早餐后" checked /> 早餐后</label>
+                <label><input type="checkbox" name="time" value="午餐后" /> 午餐后</label>
+                <label><input type="checkbox" name="time" value="晚餐后" checked /> 晚餐后</label>
+                <label><input type="checkbox" name="time" value="睡前" /> 睡前</label>
+              </div>
+            </fieldset>
+          </form>
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>已建计划</h3>
+              <span id="planCount" class="status-chip"></span>
+            </div>
+            <div id="medList" class="medicine-list"></div>
+          </section>
+        </section>
+
+        <section id="refillView" class="view">
+          <div class="content-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <h3>购药与库存</h3>
+                <span class="status-chip">按耗尽时间排序</span>
+              </div>
+              <div id="refillList" class="medicine-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-heading">
+                <h3>续方清单</h3>
+                <button id="copyRefillBtn" class="ghost-btn" type="button">生成给医生的摘要</button>
+              </div>
+              <textarea id="refillSummary" readonly></textarea>
+            </section>
+          </div>
+        </section>
+
+        <section id="reviewView" class="view">
+          <div class="content-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <h3>近 7 天依从性</h3>
+                <span id="adherenceBadge" class="status-chip"></span>
+              </div>
+              <div id="adherenceChart" class="adherence-chart"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-heading">
+                <h3>复诊准备</h3>
+                <span class="status-chip">可复制</span>
+              </div>
+              <div id="reviewNotes" class="review-notes"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <strong>还没有用药计划</strong>
+        <p>先到“用药建档”添加药品，系统会自动生成服药、购药和续方提醒。</p>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
